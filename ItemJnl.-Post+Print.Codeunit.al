@@ -1,0 +1,76 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Codeunit 242 "Item Jnl.-Post+Print"
+{
+    TableNo = "Item Journal Line";
+
+    trigger OnRun()
+    begin
+        ItemJnlLine.Copy(Rec);
+        Code;
+        Copy(ItemJnlLine);
+    end;
+
+    var
+        Text000: label 'cannot be filtered when posting recurring journals';
+        Text001: label 'Do you want to post the journal lines and print the posting report?';
+        Text002: label 'There is nothing to post.';
+        Text003: label 'The journal lines were successfully posted.';
+        Text004: label 'The journal lines were successfully posted. ';
+        Text005: label 'You are now in the %1 journal.';
+        ItemJnlTemplate: Record "Item Journal Template";
+        ItemJnlLine: Record "Item Journal Line";
+        ItemReg: Record "Item Register";
+        WhseReg: Record "Warehouse Register";
+        ItemJnlPostBatch: Codeunit "Item Jnl.-Post Batch";
+        TempJnlBatchName: Code[10];
+
+    local procedure "Code"()
+    begin
+        with ItemJnlLine do begin
+          ItemJnlTemplate.Get("Journal Template Name");
+          ItemJnlTemplate.TestField("Posting Report ID");
+          if ItemJnlTemplate.Recurring and (GetFilter("Posting Date") <> '') then
+            FieldError("Posting Date",Text000);
+
+          if not Confirm(Text001,false) then
+            exit;
+
+          TempJnlBatchName := "Journal Batch Name";
+
+          ItemJnlPostBatch.Run(ItemJnlLine);
+
+          if ItemReg.Get(ItemJnlPostBatch.GetItemRegNo) then begin
+            ItemReg.SetRecfilter;
+            Report.Run(ItemJnlTemplate."Posting Report ID",false,false,ItemReg);
+          end;
+
+          if WhseReg.Get(ItemJnlPostBatch.GetWhseRegNo) then begin
+            WhseReg.SetRecfilter;
+            Report.Run(ItemJnlTemplate."Whse. Register Report ID",false,false,WhseReg);
+          end;
+
+          if (ItemJnlPostBatch.GetItemRegNo = 0) and
+             (ItemJnlPostBatch.GetWhseRegNo = 0)
+          then
+            Message(Text002)
+          else
+            if TempJnlBatchName = "Journal Batch Name" then
+              Message(Text003)
+            else
+              Message(
+                Text004 +
+                Text005,
+                "Journal Batch Name");
+
+          if not Find('=><') or (TempJnlBatchName <> "Journal Batch Name") then begin
+            Reset;
+            FilterGroup(2);
+            SetRange("Journal Template Name","Journal Template Name");
+            SetRange("Journal Batch Name","Journal Batch Name");
+            FilterGroup(0);
+            "Line No." := 1;
+          end;
+        end;
+    end;
+}
+

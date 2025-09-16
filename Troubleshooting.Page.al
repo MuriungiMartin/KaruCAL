@@ -1,0 +1,98 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Page 5990 Troubleshooting
+{
+    Caption = 'Troubleshooting';
+    PageType = ListPlus;
+    SourceTable = "Troubleshooting Header";
+
+    layout
+    {
+        area(content)
+        {
+            group(General)
+            {
+                Caption = 'General';
+                field("No.";"No.")
+                {
+                    ApplicationArea = Basic;
+                    ToolTip = 'Specifies the number of the troubleshooting issue.';
+
+                    trigger OnAssistEdit()
+                    begin
+                        if AssistEdit(xRec) then
+                          CurrPage.Update;
+                    end;
+                }
+                field(Description;Description)
+                {
+                    ApplicationArea = Basic;
+                    ToolTip = 'Specifies a description of the troubleshooting issue.';
+                }
+            }
+            part(Control7;"Troubleshooting Subform")
+            {
+                SubPageLink = "No."=field("No.");
+            }
+        }
+        area(factboxes)
+        {
+            systempart(Control1900383207;Links)
+            {
+                Visible = false;
+            }
+            systempart(Control1905767507;Notes)
+            {
+                Visible = false;
+            }
+        }
+    }
+
+    actions
+    {
+        area(navigation)
+        {
+            group("T&roublesh.")
+            {
+                Caption = 'T&roublesh.';
+                Image = Setup;
+                separator(Action12)
+                {
+                    Caption = '';
+                }
+                action(Setup)
+                {
+                    ApplicationArea = Basic;
+                    Caption = 'Setup';
+                    Image = Setup;
+
+                    trigger OnAction()
+                    begin
+                        TblshtgSetup.Reset;
+                        TblshtgSetup.SetCurrentkey("Troubleshooting No.");
+                        TblshtgSetup.SetRange("Troubleshooting No.","No.");
+                        Page.RunModal(Page::"Troubleshooting Setup",TblshtgSetup)
+                    end;
+                }
+            }
+        }
+    }
+
+    trigger OnOpenPage()
+    begin
+        if CaptionCode <> '' then
+          CurrPage.Caption := CaptionCode + ' ' + CaptionDescription + ' - ' + CurrPage.Caption;
+    end;
+
+    var
+        TblshtgSetup: Record "Troubleshooting Setup";
+        CaptionCode: Code[20];
+        CaptionDescription: Text[30];
+
+
+    procedure SetCaption(CaptionCode2: Code[20];CaptionDescription2: Text[30])
+    begin
+        CaptionCode := CaptionCode2;
+        CaptionDescription := CaptionDescription2;
+    end;
+}
+

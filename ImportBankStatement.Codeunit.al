@@ -1,0 +1,81 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Codeunit 1200 "Import Bank Statement"
+{
+    Permissions = TableData "Data Exch. Field"=rimd;
+    TableNo = "Data Exch.";
+
+    trigger OnRun()
+    var
+        DataExchLineDef: Record "Data Exch. Line Def";
+        XMLDOMManagement: Codeunit "XML DOM Management";
+        XmlNode: dotnet XmlNode;
+        XMLStream: InStream;
+        LineNo: Integer;
+    begin
+        "File Content".CreateInstream(XMLStream);
+        XMLDOMManagement.LoadXMLNodeFromInStream(XMLStream,XmlNode);
+
+        DataExchLineDef.Get("Data Exch. Def Code","Data Exch. Line Def Code");
+
+        ProgressWindow.Open(ProgressMsg);
+        Parse(DataExchLineDef,"Entry No.",XmlNode,'','',LineNo,LineNo);
+        ProgressWindow.Close;
+    end;
+
+    var
+        ProgressMsg: label 'Preparing line number #1#######';
+        ProgressWindow: Dialog;
+
+    local procedure Parse(DataExchLineDef: Record "Data Exch. Line Def";EntryNo: Integer;XMLNode: dotnet XmlNode;ParentPath: Text;NodeId: Text[250];var LastGivenLineNo: Integer;CurrentLineNo: Integer)
+    var
+        CurrentDataExchLineDef: Record "Data Exch. Line Def";
+        XMLAttributeCollection: dotnet XmlAttributeCollection;
+        XMLNodeList: dotnet XmlNodeList;
+        XMLNodeType: dotnet XmlNodeType;
+        i: Integer;
+    begin
+        CurrentDataExchLineDef.SetRange("Data Line Tag",ParentPath + '/' + XMLNode.LocalName);
+        CurrentDataExchLineDef.SetRange("Data Exch. Def Code",DataExchLineDef."Data Exch. Def Code");
+        if CurrentDataExchLineDef.FindFirst then begin
+          DataExchLineDef := CurrentDataExchLineDef;
+          LastGivenLineNo += 1;
+          CurrentLineNo := LastGivenLineNo;
+          DataExchLineDef.ValidateNamespace(XMLNode);
+        end;
+
+        if XMLNode.NodeType.Equals(XMLNodeType.Text) or XMLNode.NodeType.Equals(XMLNodeType.CDATA) then
+          InsertColumn(ParentPath,CurrentLineNo,NodeId,XMLNode.Value,DataExchLineDef,EntryNo);
+
+        if not IsNull(XMLNode.Attributes) then begin
+          XMLAttributeCollection := XMLNode.Attributes;
+          for i := 1 to XMLAttributeCollection.Count do
+            InsertColumn(ParentPath + '/' + XMLNode.LocalName + '[@' + XMLAttributeCollection.Item(i - 1).Name + ']',
+              CurrentLineNo,NodeId,XMLAttributeCollection.Item(i - 1).Value,DataExchLineDef,EntryNo);
+        end;
+
+        if XMLNode.HasChildNodes then begin
+          XMLNodeList := XMLNode.ChildNodes;
+          for i := 1 to XMLNodeList.Count do
+            Parse(DataExchLineDef,EntryNo,XMLNodeList.Item(i - 1),ParentPath + '/' + XMLNode.LocalName,
+              NodeId + Format(i,0,'<Integer,4><Filler Char,0>'),LastGivenLineNo,CurrentLineNo);
+        end;
+    end;
+
+    local procedure InsertColumn(Path: Text;LineNo: Integer;NodeId: Text[250];Value: Text;var DataExchLineDef: Record "Data Exch. Line Def";EntryNo: Integer)
+    var
+        DataExchColumnDef: Record "Data Exch. Column Def";
+        DataExchField: Record "Data Exch. Field";
+    begin
+        // Note: The Data Exch. variable is passed by reference only to improve performance.
+        DataExchColumnDef.SetRange("Data Exch. Def Code",DataExchLineDef."Data Exch. Def Code");
+        DataExchColumnDef.SetRange("Data Exch. Line Def Code",DataExchLineDef.Code);
+        DataExchColumnDef.SetRange(Path,Path);
+
+        if DataExchColumnDef.FindFirst then begin
+          ProgressWindow.Update(1,LineNo);
+          DataExchField.InsertRecXMLField(EntryNo,LineNo,DataExchColumnDef."Column No.",NodeId,Value,
+            DataExchLineDef.Code);
+        end;
+    end;
+}
+

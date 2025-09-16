@@ -1,0 +1,160 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Report 1092 "Job Transfer to Credit Memo"
+{
+    Caption = 'Job Transfer to Credit Memo';
+    ProcessingOnly = true;
+
+    dataset
+    {
+    }
+
+    requestpage
+    {
+
+        layout
+        {
+            area(content)
+            {
+                group(Options)
+                {
+                    Caption = 'Options';
+                    field(CreateNewCreditMemo;NewCreditMemo)
+                    {
+                        ApplicationArea = Jobs;
+                        Caption = 'Create New Credit Memo';
+                        ToolTip = 'Specifies if the batch job creates a new sales credit memo.';
+
+                        trigger OnValidate()
+                        begin
+                            if NewCreditMemo then begin
+                              CreditMemoNo := '';
+                              if PostingDate = 0D then
+                                PostingDate := WorkDate;
+                              CrMemoPostingDate := 0D;
+                            end;
+                        end;
+                    }
+                    field(PostingDate;PostingDate)
+                    {
+                        ApplicationArea = Jobs;
+                        Caption = 'Posting Date';
+                        ToolTip = 'Specifies the posting date for the document.';
+
+                        trigger OnValidate()
+                        begin
+                            if PostingDate = 0D then
+                              NewCreditMemo := false;
+                        end;
+                    }
+                    field(AppendToCreditMemoNo;CreditMemoNo)
+                    {
+                        ApplicationArea = Jobs;
+                        Caption = 'Append to Credit Memo No.';
+                        ToolTip = 'Specifies the number of the credit memo that you want to append the lines to if you did not select the Create New Credit Memo field.';
+
+                        trigger OnLookup(var Text: Text): Boolean
+                        begin
+                            Clear(SalesHeader);
+                            SalesHeader.FilterGroup := 2;
+                            SalesHeader.SetRange("Document Type",SalesHeader."document type"::"Credit Memo");
+                            SalesHeader.SetRange("Bill-to Customer No.",Job."Bill-to Customer No.");
+                            SalesHeader.FilterGroup := 0;
+                            if Page.RunModal(0,SalesHeader) = Action::LookupOK then
+                              CreditMemoNo := SalesHeader."No.";
+                            if CreditMemoNo <> '' then begin
+                              SalesHeader.Get(SalesHeader."document type"::"Credit Memo",CreditMemoNo);
+                              CrMemoPostingDate := SalesHeader."Posting Date";
+                              NewCreditMemo := false;
+                              PostingDate := 0D;
+                            end;
+                            if CreditMemoNo = '' then
+                              InitReport;
+                        end;
+
+                        trigger OnValidate()
+                        begin
+                            if CreditMemoNo <> '' then begin
+                              SalesHeader.Get(SalesHeader."document type"::"Credit Memo",CreditMemoNo);
+                              CrMemoPostingDate := SalesHeader."Posting Date";
+                              NewCreditMemo := false;
+                              PostingDate := 0D;
+                            end;
+                            if CreditMemoNo = '' then
+                              InitReport;
+                        end;
+                    }
+                    field(CrMemoPostingDate;CrMemoPostingDate)
+                    {
+                        ApplicationArea = Jobs;
+                        Caption = 'Cr. Memo Posting Date';
+                        Editable = false;
+                        ToolTip = 'Specifies the posting date of that credit memo if you filled the Append to Credit Memo No. field.';
+
+                        trigger OnValidate()
+                        begin
+                            if PostingDate = 0D then
+                              NewCreditMemo := false;
+                        end;
+                    }
+                }
+            }
+        }
+
+        actions
+        {
+        }
+
+        trigger OnOpenPage()
+        begin
+            InitReport;
+        end;
+    }
+
+    labels
+    {
+    }
+
+    trigger OnInitReport()
+    begin
+        Done := false;
+    end;
+
+    trigger OnPostReport()
+    begin
+        Done := true;
+    end;
+
+    var
+        Job: Record Job;
+        SalesHeader: Record "Sales Header";
+        NewCreditMemo: Boolean;
+        CreditMemoNo: Code[20];
+        PostingDate: Date;
+        CrMemoPostingDate: Date;
+        Done: Boolean;
+
+
+    procedure GetCreditMemoNo(var Done2: Boolean;var NewCreditMemo2: Boolean;var PostingDate2: Date;var CreditMemoNo2: Code[20])
+    begin
+        Done2 := Done;
+        NewCreditMemo2 := NewCreditMemo;
+        PostingDate2 := PostingDate;
+        CreditMemoNo2 := CreditMemoNo;
+    end;
+
+
+    procedure InitReport()
+    begin
+        PostingDate := WorkDate;
+        NewCreditMemo := true;
+        CreditMemoNo := '';
+        CrMemoPostingDate := 0D;
+    end;
+
+
+    procedure SetCustomer(JobNo: Code[20])
+    begin
+        Job.Get(JobNo);
+    end;
+}
+

@@ -1,0 +1,94 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Codeunit 1710 "Exp. User Feedback Pos. Pay"
+{
+    Permissions = TableData "Check Ledger Entry"=rimd,
+                  TableData "Positive Pay Entry"=rimd,
+                  TableData "Positive Pay Entry Detail"=rimd;
+    TableNo = "Data Exch.";
+
+    trigger OnRun()
+    var
+        CheckLedgerEntry: Record "Check Ledger Entry";
+        PositivePayEntry: Record "Positive Pay Entry";
+        BankAccNo: Code[20];
+        LastUpdateDateTime: DateTime;
+    begin
+        // Update the CheckLedgerEntry for the Data Exch. Entry No. as exported successfully
+        CheckLedgerEntry.SetRange("Data Exch. Entry No.","Entry No.");
+        CheckLedgerEntry.SetRange("Positive Pay Exported",false);
+        CheckLedgerEntry.SetFilter(
+          "Entry Status",'%1|%2|>%3',
+          CheckLedgerEntry."entry status"::Printed,
+          CheckLedgerEntry."entry status"::Posted,
+          CheckLedgerEntry."entry status"::"Test Print");
+        if CheckLedgerEntry.FindFirst then
+          BankAccNo := CheckLedgerEntry."Bank Account No.";
+        CheckLedgerEntry.ModifyAll("Positive Pay Exported",true,true);
+
+        // Update the CheckLedgerEntry for the Data Exch. Voided Entry No. for Checks as exported successfully
+        CheckLedgerEntry.SetRange("Data Exch. Entry No.");
+        CheckLedgerEntry.SetRange("Data Exch. Voided Entry No.","Entry No.");
+        CheckLedgerEntry.SetFilter(
+          "Entry Status",'%1|%2|%3',
+          CheckLedgerEntry."entry status"::Voided,
+          CheckLedgerEntry."entry status"::"Financially Voided",
+          CheckLedgerEntry."entry status"::"Test Print");
+        // Only populate the BankAcct if there were no open checks found in case there are no voids
+        if BankAccNo = '' then
+          if CheckLedgerEntry.FindFirst then
+            BankAccNo := CheckLedgerEntry."Bank Account No.";
+        CheckLedgerEntry.ModifyAll("Positive Pay Exported",true,true);
+
+        if BankAccNo <> '' then
+          LastUpdateDateTime := GetLastUploadDateTime(BankAccNo);
+
+        // Initialize Pos. Pay Enties
+        PositivePayEntry.Init;
+        PositivePayEntry.Validate("Bank Account No.",BankAccNo);
+        PositivePayEntry."Last Upload Date" := Dt2Date(LastUpdateDateTime);
+        PositivePayEntry."Last Upload Time" := Dt2Time(LastUpdateDateTime);
+
+        // Retrieve the range of exported data and move Pos. Pay Entry Detail tables
+        CreatePosPayEntryDetail(PositivePayEntry,"Entry No.",BankAccNo);
+
+        CalcFields("File Content");
+        PositivePayEntry."Exported File" := "File Content";
+        PositivePayEntry.Insert;
+    end;
+
+    local procedure GetLastUploadDateTime(BankAccNo: Code[20]): DateTime
+    var
+        PositivePayEntry: Record "Positive Pay Entry";
+    begin
+        // Retrieve the Last Updated Date and Time to set in the new record
+        PositivePayEntry.SetRange("Bank Account No.",BankAccNo);
+        if PositivePayEntry.FindLast then
+          exit(PositivePayEntry."Upload Date-Time");
+    end;
+
+    local procedure CreatePosPayEntryDetail(var PositivePayEntry: Record "Positive Pay Entry";EntryNo: Integer;BankAccNo: Code[20])
+    var
+        PositivePayEntryDetail: Record "Positive Pay Entry Detail";
+        PositivePayDetail: Record "Positive Pay Detail";
+    begin
+        PositivePayDetail.SetRange("Data Exch. Entry No.",EntryNo);
+        if PositivePayDetail.FindSet then begin
+          repeat
+            PositivePayEntryDetail.Init;
+            PositivePayEntryDetail."Upload Date-Time" := PositivePayEntry."Upload Date-Time";
+            PositivePayEntryDetail.CopyFromPosPayEntryDetail(PositivePayDetail,BankAccNo);
+            if PositivePayEntryDetail."Document Type" = PositivePayEntryDetail."document type"::CHECK then begin
+              PositivePayEntry."Number of Checks" += 1;
+              PositivePayEntry."Check Amount" += PositivePayEntryDetail.Amount;
+            end else begin
+              PositivePayEntry."Number of Voids" += 1;
+              PositivePayEntry."Void Amount" += PositivePayEntryDetail.Amount;
+            end;
+            PositivePayEntry."Number of Uploads" += 1;
+            PositivePayEntryDetail.Insert;
+
+          until PositivePayDetail.Next = 0;
+        end;
+    end;
+}
+

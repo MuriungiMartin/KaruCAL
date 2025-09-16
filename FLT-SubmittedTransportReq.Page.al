@@ -1,0 +1,239 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Page 69123 "FLT-Submitted Transport Req"
+{
+    DeleteAllowed = false;
+    InsertAllowed = false;
+    PageType = Document;
+    SourceTable = UnknownTable61801;
+    SourceTableView = where(Status=filter(Open|"Pending Approval"),
+                            Submitted=filter(Yes));
+
+    layout
+    {
+        area(content)
+        {
+            group(General)
+            {
+                field("Transport Requisition No";"Transport Requisition No")
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+                field("Emp No";"Emp No")
+                {
+                    ApplicationArea = Basic;
+                    Caption = 'Patron No.';
+                    Editable = editable;
+                }
+                field("Employee Name";"Employee Name")
+                {
+                    ApplicationArea = Basic;
+                    Caption = 'Patron Name';
+                    Editable = editable;
+                }
+                field(Position;Position)
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+                field(From;Commencement)
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+                field("To";Destination)
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+                field("Date of Trip";"Date of Trip")
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+                field("Purpose of Trip";"Purpose of Trip")
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+                field("Nature of Trip";"Nature of Trip")
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+                field(Group;Group)
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+                field("Club/Societies";"Club/Societies")
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+                field("No Of Passangers";"No Of Passangers")
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+                field("No of Days Requested";"No of Days Requested")
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+                field("Requested By";"Requested By")
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+                field(Comments;Comments)
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+                field("Responsibility Center";"Responsibility Center")
+                {
+                    ApplicationArea = Basic;
+                    Editable = editable;
+                }
+            }
+            group("TRANSPORT OFFICER")
+            {
+                Editable = true;
+                field(Status;Status)
+                {
+                    ApplicationArea = Basic;
+                    Editable = false;
+                }
+                field("Transport Available/Not Av.";"Transport Available/Not Av.")
+                {
+                    ApplicationArea = Basic;
+                }
+                field("Type of Vehicle";"Type of Vehicle")
+                {
+                    ApplicationArea = Basic;
+                }
+                field("Vehicle Allocated";"Vehicle Allocated")
+                {
+                    ApplicationArea = Basic;
+                }
+                field("Driver Allocated";"Driver Allocated")
+                {
+                    ApplicationArea = Basic;
+                }
+                field("Opening Odometer Reading";"Opening Odometer Reading")
+                {
+                    ApplicationArea = Basic;
+                }
+                field("Approved Rate";"Approved Rate")
+                {
+                    ApplicationArea = Basic;
+                }
+                field("Fuel Unit Cost";"Fuel Unit Cost")
+                {
+                    ApplicationArea = Basic;
+                }
+                field("Estimated Mileage";"Estimated Mileage")
+                {
+                    ApplicationArea = Basic;
+                }
+                field("Total Cost";"Total Cost")
+                {
+                    ApplicationArea = Basic;
+                }
+            }
+        }
+    }
+
+    actions
+    {
+        area(processing)
+        {
+            group("&Functions")
+            {
+                Caption = '&Functions';
+                action(Approvals)
+                {
+                    ApplicationArea = Basic;
+                    Caption = 'Approvals';
+                    Image = Approvals;
+                    Promoted = true;
+                    PromotedIsBig = true;
+
+                    trigger OnAction()
+                    begin
+                        DocumentType:=Documenttype::TR;
+                        ApprovalEntries.Setfilters(Database::"FLT-Transport Requisition",DocumentType,"Transport Requisition No");
+                        ApprovalEntries.Run;
+                    end;
+                }
+                action(SendApprovalReq)
+                {
+                    ApplicationArea = Basic;
+                    Caption = 'Send Approval Request';
+                    Image = Apply;
+                    Promoted = true;
+                    PromotedIsBig = true;
+
+                    trigger OnAction()
+                    var
+                        ApprovalMgt: Codeunit "Export F/O Consolidation";
+                        showmessage: Boolean;
+                        ManualCancel: Boolean;
+                        State: Option Open,"Pending Approval",Cancelled,Approved;
+                        DocType: Option Quote,"Order",Invoice,"Credit Memo","Blanket Order","Return Order","None","Payment Voucher","Petty Cash",Imprest,Requisition,ImprestSurrender,Interbank,TransportRequest,Maintenance,Fuel,ImporterExporter,"Import Permit","Export Permit",TR,"Safari Notice","Student Applications","Water Research","Consultancy Requests","Consultancy Proposals","Meals Bookings","General Journal","Student Admissions","Staff Claim",KitchenStoreRequisition,"Leave Application";
+                        tableNo: Integer;
+                    begin
+
+                          TestField(Status,Status::Open);
+                          TestField( Commencement);
+                          TestField(Destination );
+                          TestField("Date of Trip");
+                          TestField("Purpose of Trip");
+
+                         State:=State::Open;
+                         if Status<>Status::Open then State:=State::"Pending Approval";
+                         DocType:=Doctype::TR;
+                         Clear(tableNo);
+                         tableNo:=61801;
+                         if ApprovalMgt.SendApproval(tableNo,Rec."Transport Requisition No",DocType,State,Rec."Responsibility Center",0) then;
+                    end;
+                }
+                action(PrintPreview)
+                {
+                    ApplicationArea = Basic;
+                    Caption = 'Print/Preview';
+                    Image = PrintReport;
+                    Promoted = true;
+                    PromotedIsBig = true;
+
+                    trigger OnAction()
+                    var
+                        FLTTransportRequisition: Record UnknownRecord61801;
+                    begin
+                        FLTTransportRequisition.Reset;
+                        FLTTransportRequisition.SetRange(FLTTransportRequisition."Transport Requisition No","Transport Requisition No");
+                        Report.Run(51342,true,false,FLTTransportRequisition);
+                    end;
+                }
+            }
+        }
+    }
+
+    trigger OnAfterGetRecord()
+    begin
+        editable:=false;
+    end;
+
+    var
+        Text0001: label 'You have no been setup as a Fleet Management User Contact your Systems Administrator';
+        UserMgt: Codeunit "HMS Patient Treatment Mgt";
+        ApprovalMgt: Codeunit "Export F/O Consolidation";
+        DocumentType: Option Quote,"Order",Invoice,"Credit Memo","Blanket Order","Return Order","None","Payment Voucher","Petty Cash",Imprest,Requisition,ImprestSurrender,Interbank,TransportRequest,Maintenance,Fuel,ImporterExporter,"Import Permit","Export Permit",TR,"Safari Notice","Student Applications","Water Research","Consultancy Requests","Consultancy Proposals","Meals Bookings","General Journal","Student Admissions","Staff Claim",KitchenStoreRequisition,"Leave Application";
+        ApprovalEntries: Page "Approval Entries";
+        UserSetup2: Record "User Setup";
+        hremp: Record UnknownRecord61188;
+        UserSetup3: Record "User Setup";
+        editable: Boolean;
+}
+

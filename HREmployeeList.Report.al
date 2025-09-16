@@ -1,0 +1,166 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Report 51161 "HR Employee List"
+{
+    DefaultLayout = RDLC;
+    RDLCLayout = './Layouts/HR Employee List.rdlc';
+
+    dataset
+    {
+        dataitem(UnknownTable61188;UnknownTable61188)
+        {
+            RequestFilterFields = "No.","Directorate Name","Station Name","Department Code";
+            column(ReportForNavId_6075; 6075)
+            {
+            }
+            column(FORMAT_TODAY_0_4_;Format(Today,0,4))
+            {
+            }
+            column(COMPANYNAME;COMPANYNAME)
+            {
+            }
+            column(CurrReport_PAGENO;CurrReport.PageNo)
+            {
+            }
+            column(USERID;UserId)
+            {
+            }
+            column(CI_Name;CI.Name)
+            {
+                IncludeCaption = true;
+            }
+            column(CI_Address;CI.Address)
+            {
+                IncludeCaption = true;
+            }
+            column(CI_Address2;CI."Address 2")
+            {
+                IncludeCaption = true;
+            }
+            column(CI_City;CI.City)
+            {
+                IncludeCaption = true;
+            }
+            column(CI_EMail;CI."E-Mail")
+            {
+                IncludeCaption = true;
+            }
+            column(CI_HomePage;CI."Home Page")
+            {
+                IncludeCaption = true;
+            }
+            column(CI_PhoneNo;CI."Phone No.")
+            {
+                IncludeCaption = true;
+            }
+            column(CI_Picture;CI.Picture)
+            {
+                IncludeCaption = true;
+            }
+            column(HR_Employees__No__;"No.")
+            {
+            }
+            column(HR_Employees__ID_Number_;"ID Number")
+            {
+            }
+            column(HR_Employees__Date_Of_Joining_the_Company_;"Date Of Join")
+            {
+            }
+            column(HR_Employees__FullName;"HRM-Employee C"."First Name"+' '+"HRM-Employee C"."Middle Name"+' '+"HRM-Employee C"."Last Name")
+            {
+            }
+            column(HR_Employees__Cell_Phone_Number_;"HRM-Employee C"."Cellular Phone Number")
+            {
+            }
+            column(EmployeeCaption;EmployeeCaptionLbl)
+            {
+            }
+            column(CurrReport_PAGENOCaption;CurrReport_PAGENOCaptionLbl)
+            {
+            }
+            column(Employee_ListCaption;Employee_ListCaptionLbl)
+            {
+            }
+            column(P_O__BoxCaption;P_O__BoxCaptionLbl)
+            {
+            }
+            column(HR_Employees__No__Caption;FieldCaption("No."))
+            {
+            }
+            column(HR_Employees__ID_Number_Caption;FieldCaption("ID Number"))
+            {
+            }
+            column(HR_Employees__Date_Of_Joining_the_Company_Caption;FieldCaption("Date Of Join"))
+            {
+            }
+            column(Full_NamesCaption;Full_NamesCaptionLbl)
+            {
+            }
+            column(LengthOfService_HREmployees;"HRM-Employee C"."Length Of Service")
+            {
+            }
+            column(LenghtOfServices;LenghtOfServices)
+            {
+            }
+            column(Age;Age)
+            {
+            }
+            column(JobTitle_HREmployeeC;"HRM-Employee C"."Job Title")
+            {
+            }
+            column(Gender_HREmployeeC;"HRM-Employee C".Gender)
+            {
+            }
+            column(DateofBirth;"HRM-Employee C"."Date Of Birth")
+            {
+            }
+            column(Initials;"HRM-Employee C".Initials)
+            {
+            }
+
+            trigger OnAfterGetRecord()
+            begin
+                Clear(LenghtOfServices);
+                if (("HRM-Employee C"."Date Of Join"<>0D) and ("HRM-Employee C"."Date Of Join"<=Today)) then
+                  LenghtOfServices:=HrDates.DetermineAge("HRM-Employee C"."Date Of Join",Today);
+
+                Clear(Age);
+                if (("HRM-Employee C"."Date Of Birth"<>0D) and ("HRM-Employee C"."Date Of Birth"<=Today)) then
+                  Age:=HrDates.DetermineAge("HRM-Employee C"."Date Of Birth",Today);
+            end;
+        }
+    }
+
+    requestpage
+    {
+
+        layout
+        {
+        }
+
+        actions
+        {
+        }
+    }
+
+    labels
+    {
+    }
+
+    trigger OnPreReport()
+    begin
+        CI.Get();
+        CI.CalcFields(CI.Picture);
+    end;
+
+    var
+        CI: Record "Company Information";
+        EmployeeCaptionLbl: label 'Employee';
+        CurrReport_PAGENOCaptionLbl: label 'Page';
+        Employee_ListCaptionLbl: label 'Employee List';
+        P_O__BoxCaptionLbl: label 'P.O. Box';
+        Full_NamesCaptionLbl: label 'Full Names';
+        HrDates: Codeunit "HR Dates";
+        LenghtOfServices: Text[100];
+        Age: Text[100];
+}
+

@@ -1,0 +1,67 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Codeunit 60100 "Process Bank Acc. Rec Lines-2"
+{
+    Permissions = TableData "Data Exch."=rimd;
+    TableNo = UnknownTable61000;
+
+    trigger OnRun()
+    var
+        PostingExch: Record "Data Exch.";
+        ProcessPostingExch: Codeunit "Process Data Exch.";
+        RecRef: RecordRef;
+    begin
+        PostingExch.Get("Posting Exch. Entry No.");
+        RecRef.GetTable(Rec);
+        ProcessPostingExch.ProcessAllLinesColumnMapping(PostingExch,RecRef);
+    end;
+
+    var
+        ProgressWindowMsg: label 'Please wait while the operation is being completed.';
+
+
+    procedure ImportBankStatement(BankAccRecon: Record "Bank Acc. Reconciliation";PostingExch: Record "Data Exch."): Boolean
+    var
+        BankAcc: Record "Bank Account";
+        PostExchDef: Record "Data Exch. Def";
+        PostExchMapping: Record "Data Exch. Mapping";
+        PostExchLineDef: Record "Data Exch. Line Def";
+        BankAccReconLine: Record UnknownRecord61000;
+        ProgressWindow: Dialog;
+    begin
+        BankAcc.Get(BankAccRecon."Bank Account No.");
+        BankAcc.GetPostExchDef(PostExchDef);
+
+        if not PostingExch.ImportToPostExch(PostExchDef)then
+          exit(false);
+
+        ProgressWindow.Open(ProgressWindowMsg);
+
+        CreateBankAccRecLineTemplate(BankAccReconLine,BankAccRecon,PostingExch);
+        PostExchLineDef.SetRange("Posting Exch. Def Code",PostExchDef.Code);
+        PostExchLineDef.FindFirst;
+
+        PostExchMapping.Get(PostExchDef.Code,PostExchLineDef.Code,Database::"FIN-Bank A/C Stmt Lines");
+
+        if PostExchMapping."Pre-Mapping Codeunit" <> 0 then
+          Codeunit.Run(PostExchMapping."Pre-Mapping Codeunit",BankAccReconLine);
+
+        PostExchMapping.TestField("Mapping Codeunit");
+        Codeunit.Run(PostExchMapping."Mapping Codeunit",BankAccReconLine);
+
+        if PostExchMapping."Post-Mapping Codeunit" <> 0 then
+          Codeunit.Run(PostExchMapping."Post-Mapping Codeunit",BankAccReconLine);
+
+        ProgressWindow.Close;
+        exit(true);
+    end;
+
+    local procedure CreateBankAccRecLineTemplate(var BankAccReconLine: Record UnknownRecord61000;BankAccRecon: Record "Bank Acc. Reconciliation";PostExch: Record "Data Exch.")
+    begin
+        BankAccReconLine.Init;
+        BankAccReconLine."Statement Type" := BankAccRecon."Statement Type";
+        BankAccReconLine."Statement No." := BankAccRecon."Statement No.";
+        BankAccReconLine."Bank Account No." := BankAccRecon."Bank Account No.";
+        BankAccReconLine."Posting Exch. Entry No." := PostExch."Entry No.";
+    end;
+}
+

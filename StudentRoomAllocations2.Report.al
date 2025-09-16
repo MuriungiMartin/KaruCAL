@@ -1,0 +1,114 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Report 51004 "Student Room Allocations2"
+{
+    DefaultLayout = RDLC;
+    RDLCLayout = './Layouts/Student Room Allocations2.rdlc';
+
+    dataset
+    {
+        dataitem("ACA-Students Hostel Rooms";"ACA-Students Hostel Rooms")
+        {
+            column(ReportForNavId_1000000000; 1000000000)
+            {
+            }
+            column(University;University)
+            {
+            }
+            column(HostAll;HostAll)
+            {
+            }
+            column(studNo_1;studNo[1])
+            {
+            }
+            column(Studname_1;Studname[1])
+            {
+            }
+            column(Gend_1;Gend[1])
+            {
+            }
+            column(hostelName_1;hostelName[1])
+            {
+            }
+            column(RoomNo_1;RoomNo[1])
+            {
+            }
+
+            trigger OnAfterGetRecord()
+            begin
+                    if ((i>1) or (i=0)) then begin
+                     Clear(Studname);
+                     Clear(studNo);
+                     Clear(Gend);
+                     Clear(hostelName);
+                     Clear(RoomNo);
+                     Clear(SpaceNo);
+
+                    Clear(i);
+                      i:=1;
+                      end;
+
+                   HOST.Reset;
+                   HOST.SetRange(HOST."Asset No","ACA-Students Hostel Rooms"."Hostel No");
+                   if HOST.Find('-') then begin
+                   end;
+
+                    studNo[i]:="ACA-Students Hostel Rooms".Student;
+                    Studname[i]:="ACA-Students Hostel Rooms"."Student Name";
+                    Gend[i]:=Format("ACA-Students Hostel Rooms".Gender);
+                    hostelName[i]:=HOST.Description;//"Room Allocation Buffer"."Hostel No";
+                    RoomNo[i]:="ACA-Students Hostel Rooms"."Room No";
+                    SpaceNo[i]:="ACA-Students Hostel Rooms"."Space No";
+
+                    studNo[i]:='NO: '+studNo[i];
+                    Studname[i]:='NAME: '+Studname[i];
+                    Gend[i]:='GENDER: '+Gend[i];
+                    hostelName[i]:='HOSTEL: '+hostelName[i];
+                    RoomNo[i]:='ROOM: '+RoomNo[i]+', SPACE: '+SpaceNo[i];;
+
+
+                    i:=i+1;
+            end;
+        }
+    }
+
+    requestpage
+    {
+
+        layout
+        {
+        }
+
+        actions
+        {
+        }
+    }
+
+    labels
+    {
+    }
+
+    trigger OnPreReport()
+    begin
+             Clear(Studname);
+             Clear(studNo);
+             Clear(Gend);
+             Clear(hostelName);
+             Clear(RoomNo);
+             Clear(SpaceNo);
+            // CLEAR(i);
+           // i:=1;
+    end;
+
+    var
+        Studname: array [1] of Text[150];
+        studNo: array [1] of Code[50];
+        Gend: array [1] of Code[50];
+        hostelName: array [1] of Code[100];
+        RoomNo: array [1] of Code[50];
+        SpaceNo: array [1] of Code[50];
+        University: label 'KARATINA UNIVERSITY';
+        HostAll: label 'Student Hostel Allocation';
+        i: Integer;
+        HOST: Record "ACA-Hostel Card";
+}
+

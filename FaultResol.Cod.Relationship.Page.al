@@ -1,0 +1,252 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Page 5930 "Fault/Resol. Cod. Relationship"
+{
+    ApplicationArea = Basic;
+    Caption = 'Fault/Resolution Codes Relationships';
+    DelayedInsert = true;
+    PageType = Worksheet;
+    SourceTable = "Fault/Resol. Cod. Relationship";
+    SourceTableView = sorting("Service Item Group Code","Fault Code",Occurrences)
+                      order(descending);
+    UsageCategory = Tasks;
+
+    layout
+    {
+        area(content)
+        {
+            group(General)
+            {
+                Caption = 'General';
+                field(ServItemGroupCode;ServItemGroupCode)
+                {
+                    ApplicationArea = Basic;
+                    Caption = 'Service Item Group';
+                    TableRelation = "Service Item Group".Code;
+
+                    trigger OnValidate()
+                    begin
+                        if ServItemGroupCode <> '' then
+                          SetRange("Service Item Group Code",ServItemGroupCode)
+                        else
+                          SetRange("Service Item Group Code");
+                        ServItemGroupCodeOnAfterValida;
+                    end;
+                }
+                field(FaultArea;FaultArea)
+                {
+                    ApplicationArea = Basic;
+                    Caption = 'Fault Area Code';
+                    TableRelation = "Fault Area".Code;
+
+                    trigger OnValidate()
+                    begin
+                        if FaultArea <> '' then
+                          SetRange("Fault Area Code",FaultArea)
+                        else
+                          SetRange("Fault Area Code");
+                        FaultAreaOnAfterValidate;
+                    end;
+                }
+                field(SymptomCode;SymptomCode)
+                {
+                    ApplicationArea = Basic;
+                    Caption = 'Symptom Code';
+                    TableRelation = "Symptom Code".Code;
+
+                    trigger OnValidate()
+                    begin
+                        if SymptomCode <> '' then
+                          SetRange("Symptom Code",SymptomCode)
+                        else
+                          SetRange("Symptom Code");
+                        SymptomCodeOnAfterValidate;
+                    end;
+                }
+                field(FaultCode;FaultCode)
+                {
+                    ApplicationArea = Basic;
+                    Caption = 'Fault Code';
+
+                    trigger OnLookup(var Text: Text): Boolean
+                    begin
+                        FaultCodeRec.SetRange("Fault Area Code",FaultArea);
+                        FaultCodeRec.SetRange("Symptom Code",SymptomCode);
+                        if not FaultCodeRec.Get(FaultArea,SymptomCode,FaultCode) then;
+                        if Page.RunModal(0,FaultCodeRec) = Action::LookupOK then begin
+                          FaultCode := FaultCodeRec.Code;
+                          SetRange("Fault Code",FaultCode);
+                          CurrPage.Update(false);
+                        end;
+                    end;
+
+                    trigger OnValidate()
+                    begin
+                        if FaultCode <> '' then begin
+                          FaultCodeRec.Get(FaultArea,SymptomCode,FaultCode);
+                          SetRange("Fault Code",FaultCode);
+                        end else
+                          SetRange("Fault Code");
+                        FaultCodeOnAfterValidate;
+                    end;
+                }
+            }
+            repeater(Control1)
+            {
+                field("Fault Area Code";"Fault Area Code")
+                {
+                    ApplicationArea = Basic;
+                    ToolTip = 'Specifies the fault area code.';
+                }
+                field("Symptom Code";"Symptom Code")
+                {
+                    ApplicationArea = Basic;
+                    ToolTip = 'Specifies the symptom code.';
+                }
+                field("Fault Code";"Fault Code")
+                {
+                    ApplicationArea = Basic;
+                    ToolTip = 'Specifies the fault code.';
+                }
+                field("Resolution Code";"Resolution Code")
+                {
+                    ApplicationArea = Basic;
+                    ToolTip = 'Specifies the resolution code.';
+                }
+                field("Service Item Group Code";"Service Item Group Code")
+                {
+                    ApplicationArea = Basic;
+                    ToolTip = 'Specifies the code of the service item group linked to the relationship.';
+                }
+                field(Description;Description)
+                {
+                    ApplicationArea = Basic;
+                    ToolTip = 'Specifies a description of the relationship between the fault code and the resolution code.';
+                }
+                field(Occurrences;Occurrences)
+                {
+                    ApplicationArea = Basic;
+                    ToolTip = 'Specifies the number of times the combination of fault code, symptom code, fault area, and resolution code occurs in the posted service lines.';
+                }
+            }
+        }
+        area(factboxes)
+        {
+            systempart(Control1900383207;Links)
+            {
+                Visible = false;
+            }
+            systempart(Control1905767507;Notes)
+            {
+                Visible = false;
+            }
+        }
+    }
+
+    actions
+    {
+    }
+
+    trigger OnQueryClosePage(CloseAction: action): Boolean
+    begin
+        if CloseAction in [Action::OK,Action::LookupOK] then
+          OKOnPush;
+    end;
+
+    var
+        FaultCodeRec: Record "Fault Code";
+        ServItemLine: Record "Service Item Line";
+        ServInvLine: Record "Service Line";
+        ServItemGroupCode: Code[10];
+        FaultArea: Code[10];
+        FaultCode: Code[10];
+        SymptomCode: Code[10];
+        ServTableID: Integer;
+        ServDocumentType: Integer;
+        ServDocumentNo: Code[20];
+        ServLineNo: Integer;
+
+
+    procedure SetFilters(Symptom: Code[10];Fault: Code[10];"Area": Code[10];ServItemGroup: Code[10])
+    begin
+        ServItemGroupCode := ServItemGroup;
+        FaultArea := Area;
+        FaultCode := Fault;
+        SymptomCode := Symptom;
+        if Fault <> '' then
+          SetRange("Fault Code",Fault)
+        else
+          SetRange("Fault Code");
+        if Area <> '' then
+          SetRange("Fault Area Code",Area)
+        else
+          SetRange("Fault Area Code");
+        if Symptom <> '' then
+          SetRange("Symptom Code",Symptom)
+        else
+          SetRange("Symptom Code");
+        if ServItemGroup <> '' then
+          SetRange("Service Item Group Code",ServItemGroup)
+        else
+          SetRange("Service Item Group Code");
+    end;
+
+
+    procedure SetDocument(TableID: Integer;DocumentType: Integer;DocumentNo: Code[20];LineNo: Integer)
+    begin
+        ServDocumentType := DocumentType;
+        ServDocumentNo := DocumentNo;
+        ServLineNo := LineNo;
+        ServTableID := TableID;
+    end;
+
+    local procedure UpdateOrginalRecord()
+    begin
+        case ServTableID of
+          Database::"Service Item Line":
+            begin
+              ServItemLine.Get(ServDocumentType,ServDocumentNo,ServLineNo);
+              ServItemLine."Fault Area Code" := "Fault Area Code";
+              ServItemLine."Symptom Code" := "Symptom Code";
+              ServItemLine."Fault Code" := "Fault Code";
+              ServItemLine."Resolution Code" := "Resolution Code";
+              ServItemLine.Modify(true);
+            end;
+          Database::"Service Line":
+            begin
+              ServInvLine.Get(ServDocumentType,ServDocumentNo,ServLineNo);
+              ServInvLine."Fault Area Code" := "Fault Area Code";
+              ServInvLine."Symptom Code" := "Symptom Code";
+              ServInvLine."Fault Code" := "Fault Code";
+              ServInvLine."Resolution Code" := "Resolution Code";
+              ServInvLine.Modify;
+            end;
+        end;
+    end;
+
+    local procedure FaultAreaOnAfterValidate()
+    begin
+        CurrPage.Update(false);
+    end;
+
+    local procedure SymptomCodeOnAfterValidate()
+    begin
+        CurrPage.Update(false);
+    end;
+
+    local procedure ServItemGroupCodeOnAfterValida()
+    begin
+        CurrPage.Update(false);
+    end;
+
+    local procedure FaultCodeOnAfterValidate()
+    begin
+        CurrPage.Update(false);
+    end;
+
+    local procedure OKOnPush()
+    begin
+        UpdateOrginalRecord;
+        CurrPage.Close;
+    end;
+}
+

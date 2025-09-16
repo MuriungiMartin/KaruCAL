@@ -1,0 +1,51 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Codeunit 1603 "Export Sales Cr.M. - PEPPOL2.0"
+{
+    TableNo = "Record Export Buffer";
+
+    trigger OnRun()
+    var
+        SalesCrMemoHeader: Record "Sales Cr.Memo Header";
+        RecordRef: RecordRef;
+    begin
+        RecordRef.Get(RecordID);
+        RecordRef.SetTable(SalesCrMemoHeader);
+
+        ServerFilePath := GenerateXMLFile(SalesCrMemoHeader);
+
+        Modify;
+    end;
+
+    var
+        ExportPathGreaterThan250Err: label 'The export path is longer than 250 characters.';
+
+
+    procedure GenerateXMLFile(VariantRec: Variant): Text[250]
+    var
+        FileManagement: Codeunit "File Management";
+        SalesCreditMemoPEPPOL20: XmlPort "Sales Credit Memo - PEPPOL 2.0";
+        OutFile: File;
+        OutStream: OutStream;
+        XmlServerPath: Text;
+    begin
+        XmlServerPath := FileManagement.ServerTempFileName('xml');
+
+        if StrLen(XmlServerPath) > 250 then
+          Error(ExportPathGreaterThan250Err);
+
+        if not Exists(XmlServerPath) then
+          OutFile.Create(XmlServerPath)
+        else
+          OutFile.Open(XmlServerPath);
+
+        // Generate XML
+        OutFile.CreateOutstream(OutStream);
+        SalesCreditMemoPEPPOL20.Initialize(VariantRec);
+        SalesCreditMemoPEPPOL20.SetDestination(OutStream);
+        SalesCreditMemoPEPPOL20.Export;
+        OutFile.Close;
+
+        exit(CopyStr(XmlServerPath,1,250));
+    end;
+}
+

@@ -1,0 +1,87 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Page 5908 "Service Order Types"
+{
+    ApplicationArea = Basic;
+    Caption = 'Service Order Types';
+    PageType = List;
+    SourceTable = "Service Order Type";
+    UsageCategory = Lists;
+
+    layout
+    {
+        area(content)
+        {
+            repeater(Control1)
+            {
+                field("Code";Code)
+                {
+                    ApplicationArea = Basic;
+                    ToolTip = 'Specifies a code for the service order type.';
+                }
+                field(Description;Description)
+                {
+                    ApplicationArea = Basic;
+                    ToolTip = 'Specifies a description of the service order type.';
+                }
+            }
+        }
+        area(factboxes)
+        {
+            systempart(Control1900383207;Links)
+            {
+                Visible = false;
+            }
+            systempart(Control1905767507;Notes)
+            {
+                Visible = false;
+            }
+        }
+    }
+
+    actions
+    {
+        area(navigation)
+        {
+            group("Service Order Type")
+            {
+                Caption = 'Service Order Type';
+                Image = ServiceCode;
+                group(Dimensions)
+                {
+                    Caption = 'Dimensions';
+                    Image = Dimensions;
+                    action("Dimensions-Single")
+                    {
+                        ApplicationArea = Basic;
+                        Caption = 'Dimensions-Single';
+                        Image = Dimensions;
+                        RunObject = Page "Default Dimensions";
+                        RunPageLink = "Table ID"=const(5903),
+                                      "No."=field(Code);
+                        ShortCutKey = 'Shift+Ctrl+D';
+                        ToolTip = 'View or edit the single set of dimensions that are set up for the selected record.';
+                    }
+                    action("Dimensions-&Multiple")
+                    {
+                        AccessByPermission = TableData Dimension=R;
+                        ApplicationArea = Basic;
+                        Caption = 'Dimensions-&Multiple';
+                        Image = DimensionSets;
+                        ToolTip = 'View or edit dimensions for a group of records. You can assign dimension codes to transactions to distribute costs and analyze historical information.';
+
+                        trigger OnAction()
+                        var
+                            ServiceOrderType: Record "Service Order Type";
+                            DefaultDimMultiple: Page "Default Dimensions-Multiple";
+                        begin
+                            CurrPage.SetSelectionFilter(ServiceOrderType);
+                            DefaultDimMultiple.SetMultiServiceOrderType(ServiceOrderType);
+                            DefaultDimMultiple.RunModal;
+                        end;
+                    }
+                }
+            }
+        }
+    }
+}
+

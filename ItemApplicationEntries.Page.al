@@ -1,0 +1,64 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Page 506 "Item Application Entries"
+{
+    Caption = 'Item Application Entries';
+    Editable = false;
+    PageType = List;
+    SourceTable = "Item Application Entry";
+
+    layout
+    {
+        area(content)
+        {
+            repeater(Control1)
+            {
+                field("Posting Date";"Posting Date")
+                {
+                    ApplicationArea = Suite;
+                    ToolTip = 'Specifies the posting date that corresponds to the posting date of the item ledger entry, for which this item application entry was created.';
+                }
+                field("Item Ledger Entry No.";"Item Ledger Entry No.")
+                {
+                    ApplicationArea = Suite;
+                    ToolTip = 'Specifies one or more item application entries for each inventory transaction that is posted.';
+                }
+                field("Inbound Item Entry No.";"Inbound Item Entry No.")
+                {
+                    ApplicationArea = Suite;
+                    ToolTip = 'Specifies the number of the item ledger entry corresponding to the inventory increase or positive quantity in inventory.';
+                }
+                field("Outbound Item Entry No.";"Outbound Item Entry No.")
+                {
+                    ApplicationArea = Suite;
+                    ToolTip = 'Specifies the number of the item ledger entry corresponding to the inventory decrease for this entry.';
+                }
+                field(Quantity;Quantity)
+                {
+                    ApplicationArea = Suite;
+                    ToolTip = 'Specifies the quantity of the item that is being applied from the inventory decrease in the Outbound Item Entry No. field, to the inventory increase in the Inbound Item Entry No. field.';
+                }
+                field("Entry No.";"Entry No.")
+                {
+                    ApplicationArea = Suite;
+                    ToolTip = 'Specifies a unique entry number for each item application entry.';
+                }
+            }
+        }
+        area(factboxes)
+        {
+            systempart(Control1900383207;Links)
+            {
+                Visible = false;
+            }
+            systempart(Control1905767507;Notes)
+            {
+                Visible = false;
+            }
+        }
+    }
+
+    actions
+    {
+    }
+}
+

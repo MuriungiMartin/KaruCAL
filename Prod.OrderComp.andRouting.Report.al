@@ -1,0 +1,243 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Report 5500 "Prod. Order Comp. and Routing"
+{
+    DefaultLayout = RDLC;
+    RDLCLayout = './Layouts/Prod. Order Comp. and Routing.rdlc';
+    Caption = 'Prod. Order Comp. and Routing';
+    UsageCategory = ReportsandAnalysis;
+
+    dataset
+    {
+        dataitem("Production Order";"Production Order")
+        {
+            DataItemTableView = sorting(Status,"No.");
+            RequestFilterFields = Status,"No.";
+            column(ReportForNavId_4824; 4824)
+            {
+            }
+            column(TodayFormatted;Format(Today,0,4))
+            {
+            }
+            column(CompanyName;COMPANYNAME)
+            {
+            }
+            column(Status_ProductionOrder;Status)
+            {
+                IncludeCaption = true;
+            }
+            column(No_ProductionOrder;"No.")
+            {
+                IncludeCaption = true;
+            }
+            column(CurrReportPageNoCapt;CurrReportPageNoCaptLbl)
+            {
+            }
+            column(PrdOdrCmptsandRtngLinsCpt;PrdOdrCmptsandRtngLinsCptLbl)
+            {
+            }
+            column(ProductionOrderDescCapt;ProductionOrderDescCaptLbl)
+            {
+            }
+            dataitem("Prod. Order Line";"Prod. Order Line")
+            {
+                DataItemLink = Status=field(Status),"Prod. Order No."=field("No.");
+                DataItemTableView = sorting(Status,"Prod. Order No.","Line No.");
+                RequestFilterFields = "Item No.","Line No.";
+                column(ReportForNavId_3581; 3581)
+                {
+                }
+                column(No1_ProductionOrder;"Production Order"."No.")
+                {
+                }
+                column(Desc_ProductionOrder;"Production Order".Description)
+                {
+                }
+                column(Desc_ProdOrderLine;Description)
+                {
+                }
+                column(Quantity_ProdOrderLine;Quantity)
+                {
+                    IncludeCaption = true;
+                }
+                column(ItemNo_ProdOrderLine;"Item No.")
+                {
+                }
+                column(StartgDate_ProdOrderLine;Format("Starting Date"))
+                {
+                }
+                column(StartgTime_ProdOrderLine;"Starting Time")
+                {
+                    IncludeCaption = true;
+                }
+                column(EndingDate_ProdOrderLine;Format("Ending Date"))
+                {
+                }
+                column(EndingTime_ProdOrderLine;"Ending Time")
+                {
+                    IncludeCaption = true;
+                }
+                column(DueDate_ProdOrderLine;Format("Due Date"))
+                {
+                }
+                column(LineNo_ProdOrderLine;"Line No.")
+                {
+                }
+                column(ProdOdrLineStrtngDteCapt;ProdOdrLineStrtngDteCaptLbl)
+                {
+                }
+                column(ProdOrderLineEndgDteCapt;ProdOrderLineEndgDteCaptLbl)
+                {
+                }
+                column(ProdOrderLineDueDateCapt;ProdOrderLineDueDateCaptLbl)
+                {
+                }
+                dataitem("Prod. Order Component";"Prod. Order Component")
+                {
+                    DataItemLink = Status=field(Status),"Prod. Order No."=field("Prod. Order No."),"Prod. Order Line No."=field("Line No.");
+                    DataItemTableView = sorting(Status,"Prod. Order No.","Prod. Order Line No.","Line No.");
+                    column(ReportForNavId_7771; 7771)
+                    {
+                    }
+                    column(ItemNo_PrdOrdrComp;"Item No.")
+                    {
+                    }
+                    column(ItemNo_PrdOrdrCompCaption;FieldCaption("Item No."))
+                    {
+                    }
+                    column(Description_ProdOrderComp;Description)
+                    {
+                        IncludeCaption = true;
+                    }
+                    column(Quantityper_ProdOrderComp;"Quantity per")
+                    {
+                        IncludeCaption = true;
+                    }
+                    column(UntofMesrCode_PrdOrdrComp;"Unit of Measure Code")
+                    {
+                        IncludeCaption = true;
+                    }
+                    column(RemainingQty_PrdOrdrComp;"Remaining Quantity")
+                    {
+                        IncludeCaption = true;
+                    }
+                    column(DueDate_PrdOrdrComp;Format("Due Date"))
+                    {
+                    }
+                    column(ProdOrdrLinNo_PrdOrdrComp;"Prod. Order Line No.")
+                    {
+                    }
+                    column(LineNo_PrdOrdrComp;"Line No.")
+                    {
+                    }
+
+                    trigger OnAfterGetRecord()
+                    begin
+                        if ProductionJrnlMgt.RoutingLinkValid("Prod. Order Component","Prod. Order Line") then
+                          CurrReport.Skip;
+                    end;
+                }
+                dataitem("Prod. Order Routing Line";"Prod. Order Routing Line")
+                {
+                    DataItemLink = "Routing No."=field("Routing No."),"Routing Reference No."=field("Routing Reference No."),"Prod. Order No."=field("Prod. Order No."),Status=field(Status);
+                    DataItemTableView = sorting(Status,"Prod. Order No.","Routing Reference No.","Routing No.","Operation No.");
+                    column(ReportForNavId_4877; 4877)
+                    {
+                    }
+                    column(OprNo_ProdOrderRtngLine;"Operation No.")
+                    {
+                    }
+                    column(OprNo_ProdOrderRtngLineCaption;FieldCaption("Operation No."))
+                    {
+                    }
+                    column(Type_PrdOrdRtngLin;Type)
+                    {
+                        IncludeCaption = true;
+                    }
+                    column(No_ProdOrderRoutingLine;"No.")
+                    {
+                        IncludeCaption = true;
+                    }
+                    column(LinDesc_ProdOrderRtngLine;Description)
+                    {
+                        IncludeCaption = true;
+                    }
+                    column(StrgDt_ProdOrderRtngLine;Format("Starting Date"))
+                    {
+                    }
+                    column(LinStrgTime_PrdOrdRtngLin;"Starting Time")
+                    {
+                        IncludeCaption = true;
+                    }
+                    column(EndgDte_ProdOrdrRtngLine;Format("Ending Date"))
+                    {
+                    }
+                    column(EndgTime_ProdOrdrRtngLin;"Ending Time")
+                    {
+                        IncludeCaption = true;
+                    }
+                    column(RoutgNo_ProdOrdrRtngLine;"Routing No.")
+                    {
+                    }
+                    dataitem(CompLink;"Prod. Order Component")
+                    {
+                        DataItemLink = Status=field(Status),"Prod. Order No."=field("Prod. Order No."),"Prod. Order Line No."=field("Routing Reference No."),"Routing Link Code"=field("Routing Link Code");
+                        DataItemTableView = sorting(Status,"Prod. Order No.","Routing Link Code","Flushing Method") where("Routing Link Code"=filter(<>''));
+                        column(ReportForNavId_7844; 7844)
+                        {
+                        }
+                        column(ItemNo_CompLink;"Item No.")
+                        {
+                        }
+                        column(Description_CompLink;Description)
+                        {
+                        }
+                        column(Quantityper_CompLink;"Quantity per")
+                        {
+                        }
+                        column(UntofMeasureCode_CompLink;"Unit of Measure Code")
+                        {
+                        }
+                        column(DueDate_CompLink;Format("Due Date"))
+                        {
+                        }
+                        column(RemainingQty_CompLink;"Remaining Quantity")
+                        {
+                        }
+                        column(LineNo_CompLink;"Line No.")
+                        {
+                        }
+                        column(RoutingLinkCode_CompLink;"Routing Link Code")
+                        {
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    requestpage
+    {
+
+        layout
+        {
+        }
+
+        actions
+        {
+        }
+    }
+
+    labels
+    {
+    }
+
+    var
+        ProductionJrnlMgt: Codeunit "Production Journal Mgt";
+        CurrReportPageNoCaptLbl: label 'Page';
+        PrdOdrCmptsandRtngLinsCptLbl: label 'Prod. Order - Components and Routing Lines';
+        ProductionOrderDescCaptLbl: label 'Description';
+        ProdOdrLineStrtngDteCaptLbl: label 'Starting Date';
+        ProdOrderLineEndgDteCaptLbl: label 'Ending Date';
+        ProdOrderLineDueDateCaptLbl: label 'Due Date';
+}
+

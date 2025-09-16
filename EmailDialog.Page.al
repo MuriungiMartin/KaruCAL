@@ -1,0 +1,291 @@
+#pragma warning disable AA0005, AA0008, AA0018, AA0021, AA0072, AA0137, AA0201, AA0204, AA0206, AA0218, AA0228, AL0254, AL0424, AS0011, AW0006 // ForNAV settings
+Page 9700 "Email Dialog"
+{
+    Caption = 'Send Email';
+    PageType = StandardDialog;
+    SaveValues = true;
+    SourceTable = "Email Item";
+    SourceTableTemporary = true;
+
+    layout
+    {
+        area(content)
+        {
+            field(FromAddress;ShownFromEmail)
+            {
+                ApplicationArea = Basic,Suite;
+                Caption = 'From';
+                Enabled = false;
+                ToolTip = 'Specifies the sender of the email.';
+                Visible = false;
+            }
+            field(SendTo;SendToText)
+            {
+                ApplicationArea = Basic,Suite;
+                Caption = 'To';
+                ToolTip = 'Specifies the recipient of the email.';
+
+                trigger OnValidate()
+                begin
+                    EmailItem.Validate("Send to",SendToText);
+                    SendToText := EmailItem."Send to";
+                end;
+            }
+            field(CcText;CcText)
+            {
+                ApplicationArea = Basic,Suite;
+                Caption = 'Cc';
+                ToolTip = 'Specifies one or more additional recipients.';
+
+                trigger OnValidate()
+                begin
+                    EmailItem.Validate("Send CC",CcText);
+                    CcText := EmailItem."Send CC";
+                end;
+            }
+            field(BccText;BccText)
+            {
+                ApplicationArea = Basic,Suite;
+                Caption = 'Bcc';
+                ToolTip = 'Specifies one or more additional recipients.';
+
+                trigger OnValidate()
+                begin
+                    EmailItem.Validate("Send BCC",BccText);
+                    BccText := EmailItem."Send BCC";
+                end;
+            }
+            field(Subject;EmailItem.Subject)
+            {
+                ApplicationArea = Basic,Suite;
+                Caption = 'Subject';
+                ToolTip = 'Specifies the text that will display as the subject of the email.';
+            }
+            field("Attachment Name";EmailItem."Attachment Name")
+            {
+                ApplicationArea = All;
+                Caption = 'Attachment Name';
+                Editable = IsOfficeAddin;
+                Enabled = not IsOfficeAddin;
+                ToolTip = 'Specifies the name of the attached document.';
+                Visible = HasAttachment;
+
+                trigger OnAssistEdit()
+                var
+                    MailManagement: Codeunit "Mail Management";
+                begin
+                    MailManagement.DownloadPdfAttachment(EmailItem);
+                end;
+            }
+            field(MessageContents;EmailItem."Message Type")
+            {
+                ApplicationArea = Basic,Suite;
+                Caption = 'Message Content';
+                Visible = not PlainTextVisible;
+
+                trigger OnValidate()
+                var
+                    TempBlob: Record TempBlob;
+                    FileManagement: Codeunit "File Management";
+                begin
+                    UpdatePlainTextVisible;
+
+                    case EmailItem."Message Type" of
+                      EmailItem."message type"::"From Email Body Template":
+                        begin
+                          FileManagement.BLOBImportFromServerFile(TempBlob,EmailItem."Body File Path");
+                          EmailItem.Body := TempBlob.Blob;
+                          BodyText := EmailItem.GetBodyText;
+                        end;
+                      EmailItem."message type"::"Custom Message":
+                        begin
+                          BodyText := PreviousBodyText;
+                          EmailItem.SetBodyText(BodyText);
+                        end;
+                    end;
+                end;
+            }
+            group(Control14)
+            {
+                group(Control12)
+                {
+                    Visible = not PlainTextVisible;
+                    usercontrol(BodyHTMLMessage;"Microsoft.Dynamics.Nav.Client.WebPageViewer")
+                    {
+                        ApplicationArea = Basic,Suite;
+
+                        trigger ControlAddInReady(callbackUrl: Text)
+                        begin
+                            CurrPage.BodyHTMLMessage.LinksOpenInNewWindow;
+                            CurrPage.BodyHTMLMessage.SetContent(BodyText);
+                        end;
+
+                        trigger DocumentReady()
+                        begin
+                        end;
+
+                        trigger Callback(data: Text)
+                        begin
+                        end;
+
+                        trigger Refresh(CallbackUrl: Text)
+                        begin
+                            CurrPage.BodyHTMLMessage.LinksOpenInNewWindow;
+                            CurrPage.BodyHTMLMessage.SetContent(BodyText);
+                        end;
+                    }
+                }
+                group(Control13)
+                {
+                    Visible = PlainTextVisible;
+                    field(BodyText;BodyText)
+                    {
+                        ApplicationArea = Basic,Suite;
+                        Caption = 'Message';
+                        MultiLine = true;
+                        ShowCaption = false;
+                        ToolTip = 'Specifies the body of the email.';
+
+                        trigger OnValidate()
+                        begin
+                            EmailItem.SetBodyText(BodyText);
+
+                            if "Message Type" = "message type"::"Custom Message" then
+                              PreviousBodyText := BodyText;
+                        end;
+                    }
+                }
+            }
+            field(OutlookEdit;LocalEdit)
+            {
+                ApplicationArea = All;
+                Caption = 'Edit in Outlook';
+                MultiLine = true;
+                ToolTip = 'Specifies that Microsoft Outlook will open so you can complete the email there.';
+                Visible = IsEditEnabled;
+
+                trigger OnValidate()
+                begin
+                    if LocalEdit = true then
+                      ShownFromEmail := ''
+                    else
+                      ShownFromEmail := OriginalFromEmail;
+                end;
+            }
+        }
+    }
+
+    actions
+    {
+    }
+
+    trigger OnClosePage()
+    begin
+        Rec := EmailItem;
+    end;
+
+    trigger OnInit()
+    begin
+        HasAttachment := false;
+    end;
+
+    trigger OnOpenPage()
+    var
+        TempBlob: Record TempBlob temporary;
+        FileManagement: Codeunit "File Management";
+        OfficeMgt: Codeunit "Office Management";
+        OrigMailBodyText: Text;
+    begin
+        OriginalFromEmail := OrigEmailItem."From Address";
+
+        if not IsEditEnabled then
+          LocalEdit := false;
+        if ForceOutlook then
+          LocalEdit := true;
+        if not LocalEdit then
+          ShownFromEmail := OriginalFromEmail
+        else
+          ShownFromEmail := '';
+
+        EmailItem.Subject := OrigEmailItem.Subject;
+        EmailItem."Attachment Name" := OrigEmailItem."Attachment Name";
+
+        SendToText := OrigEmailItem."Send to";
+        if OrigEmailItem."Send CC" <> '' then
+          CcText := OrigEmailItem."Send CC"
+        else
+          EmailItem."Send CC" := CcText;
+        if OrigEmailItem."Send BCC" <> '' then
+          BccText := OrigEmailItem."Send BCC"
+        else
+          EmailItem."Send BCC" := BccText;
+
+        // Since this form saves values, check the message type, if it was from a template, blank out the body text
+        if EmailItem."Message Type" = EmailItem."message type"::"From Email Body Template" then
+          BodyText := '';
+
+        if EmailItem."Plaintext Formatted" then
+          EmailItem."Message Type" := EmailItem."message type"::"Custom Message"
+        else begin
+          EmailItem."Body File Path" := OrigEmailItem."Body File Path";
+          FileManagement.BLOBImportFromServerFile(TempBlob,EmailItem."Body File Path");
+          EmailItem.Body := TempBlob.Blob;
+          EmailItem."Message Type" := EmailItem."message type"::"From Email Body Template";
+        end;
+
+        OrigMailBodyText := EmailItem.GetBodyText;
+        if OrigMailBodyText <> '' then
+          BodyText := OrigMailBodyText
+        else
+          EmailItem.SetBodyText(BodyText);
+
+        UpdatePlainTextVisible;
+        IsOfficeAddin := OfficeMgt.IsAvailable;
+    end;
+
+    var
+        EmailItem: Record "Email Item";
+        OrigEmailItem: Record "Email Item";
+        LocalEdit: Boolean;
+        IsEditEnabled: Boolean;
+        HasAttachment: Boolean;
+        ForceOutlook: Boolean;
+        PlainTextVisible: Boolean;
+        IsOfficeAddin: Boolean;
+        OriginalFromEmail: Text[250];
+        BodyText: Text;
+        SendToText: Text[250];
+        BccText: Text[250];
+        CcText: Text[250];
+        ShownFromEmail: Text;
+        PreviousBodyText: Text;
+
+
+    procedure SetValues(ParmEmailItem: Record "Email Item";ParmOutlookSupported: Boolean;ParmSmtpSupported: Boolean)
+    begin
+        EmailItem := ParmEmailItem;
+        OrigEmailItem.Copy(ParmEmailItem);
+
+        ForceOutlook := ParmOutlookSupported and not ParmSmtpSupported;
+        IsEditEnabled := ParmOutlookSupported and (CurrentClientType = Clienttype::Windows);
+        if not IsEditEnabled then
+          LocalEdit := false
+        else
+          LocalEdit := true;
+
+        if EmailItem."Attachment File Path" <> '' then
+          HasAttachment := true;
+    end;
+
+
+    procedure GetDoEdit(): Boolean
+    begin
+        exit(LocalEdit);
+    end;
+
+    local procedure UpdatePlainTextVisible()
+    begin
+        PlainTextVisible := EmailItem."Message Type" = EmailItem."message type"::"Custom Message";
+    end;
+}
+

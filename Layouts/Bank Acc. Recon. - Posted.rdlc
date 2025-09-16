@@ -1,0 +1,311 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:cl="http://schemas.microsoft.com/sqlserver/reporting/2010/01/componentdefinition" xmlns="http://schemas.microsoft.com/sqlserver/reporting/2010/01/reportdefinition">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="DataSource">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString />
+      </ConnectionProperties>
+      <rd:SecurityType>None</rd:SecurityType>
+      <rd:DataSourceID>7d06a80c-8831-4ad3-9922-d5b45948cd93</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="DataSet_Result">
+      <Query>
+        <DataSourceName>DataSource</DataSourceName>
+        <CommandText />
+      </Query>
+      <Fields>
+        <Field Name="FORMAT_TODAY_0_4_">
+          <DataField>FORMAT_TODAY_0_4_</DataField>
+        </Field>
+        <Field Name="COMPANYNAME">
+          <DataField>COMPANYNAME</DataField>
+        </Field>
+        <Field Name="CurrReport_PAGENO">
+          <DataField>CurrReport_PAGENO</DataField>
+        </Field>
+        <Field Name="USERID">
+          <DataField>USERID</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line__Bank_Account_No__">
+          <DataField>Bank_Account_Statement_Line__Bank_Account_No__</DataField>
+        </Field>
+        <Field Name="CashBkBal">
+          <DataField>CashBkBal</DataField>
+        </Field>
+        <Field Name="CashBkBalFormat">
+          <DataField>CashBkBalFormat</DataField>
+        </Field>
+        <Field Name="CashBkBal_BankStatBalance">
+          <DataField>CashBkBal_BankStatBalance</DataField>
+        </Field>
+        <Field Name="CashBkBal_BankStatBalanceFormat">
+          <DataField>CashBkBal_BankStatBalanceFormat</DataField>
+        </Field>
+        <Field Name="BankStatBalance">
+          <DataField>BankStatBalance</DataField>
+        </Field>
+        <Field Name="BankStatBalanceFormat">
+          <DataField>BankStatBalanceFormat</DataField>
+        </Field>
+        <Field Name="BankName">
+          <DataField>BankName</DataField>
+        </Field>
+        <Field Name="VarBankRec__Statement_Date_">
+          <DataField>VarBankRec__Statement_Date_</DataField>
+        </Field>
+        <Field Name="BankAccNo">
+          <DataField>BankAccNo</DataField>
+        </Field>
+        <Field Name="BankStatBalance_TotalUnpresentedChqs_UncreditedChqs">
+          <DataField>BankStatBalance_TotalUnpresentedChqs_UncreditedChqs</DataField>
+        </Field>
+        <Field Name="BankStatBalance_TotalUnpresentedChqs_UncreditedChqsFormat">
+          <DataField>BankStatBalance_TotalUnpresentedChqs_UncreditedChqsFormat</DataField>
+        </Field>
+        <Field Name="BankStatBalance_Control1102760006">
+          <DataField>BankStatBalance_Control1102760006</DataField>
+        </Field>
+        <Field Name="BankStatBalance_Control1102760006Format">
+          <DataField>BankStatBalance_Control1102760006Format</DataField>
+        </Field>
+        <Field Name="ReconciliationStatement">
+          <DataField>ReconciliationStatement</DataField>
+        </Field>
+        <Field Name="CashBkBal_BankStatBalance_Control58">
+          <DataField>CashBkBal_BankStatBalance_Control58</DataField>
+        </Field>
+        <Field Name="CashBkBal_BankStatBalance_Control58Format">
+          <DataField>CashBkBal_BankStatBalance_Control58Format</DataField>
+        </Field>
+        <Field Name="TotalUnPresented_TotalDifference">
+          <DataField>TotalUnPresented_TotalDifference</DataField>
+        </Field>
+        <Field Name="TotalUnPresented_TotalDifferenceFormat">
+          <DataField>TotalUnPresented_TotalDifferenceFormat</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line__Document_No__">
+          <DataField>Bank_Account_Statement_Line__Document_No__</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line__Transaction_Date_">
+          <DataField>Bank_Account_Statement_Line__Transaction_Date_</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line_Description">
+          <DataField>Bank_Account_Statement_Line_Description</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line__Applied_Amount_">
+          <DataField>Bank_Account_Statement_Line__Applied_Amount_</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line__Applied_Amount_Format">
+          <DataField>Bank_Account_Statement_Line__Applied_Amount_Format</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line_Reconciled">
+          <DataField>Bank_Account_Statement_Line_Reconciled</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line__Check_No__">
+          <DataField>Bank_Account_Statement_Line__Check_No__</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line_Difference">
+          <DataField>Bank_Account_Statement_Line_Difference</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line_DifferenceFormat">
+          <DataField>Bank_Account_Statement_Line_DifferenceFormat</DataField>
+        </Field>
+        <Field Name="TotalUnPresented_TotalDifference_Control13">
+          <DataField>TotalUnPresented_TotalDifference_Control13</DataField>
+        </Field>
+        <Field Name="TotalUnPresented_TotalDifference_Control13Format">
+          <DataField>TotalUnPresented_TotalDifference_Control13Format</DataField>
+        </Field>
+        <Field Name="UncreditedChqs">
+          <DataField>UncreditedChqs</DataField>
+        </Field>
+        <Field Name="UncreditedChqsFormat">
+          <DataField>UncreditedChqsFormat</DataField>
+        </Field>
+        <Field Name="TotalUnpresentedChqs">
+          <DataField>TotalUnpresentedChqs</DataField>
+        </Field>
+        <Field Name="TotalUnpresentedChqsFormat">
+          <DataField>TotalUnpresentedChqsFormat</DataField>
+        </Field>
+        <Field Name="TotalDifference">
+          <DataField>TotalDifference</DataField>
+        </Field>
+        <Field Name="TotalDifferenceFormat">
+          <DataField>TotalDifferenceFormat</DataField>
+        </Field>
+        <Field Name="BANK_ACCOUNT_RECONCILIATION_REPORTCaption">
+          <DataField>BANK_ACCOUNT_RECONCILIATION_REPORTCaption</DataField>
+        </Field>
+        <Field Name="CurrReport_PAGENOCaption">
+          <DataField>CurrReport_PAGENOCaption</DataField>
+        </Field>
+        <Field Name="Bank_Code_Caption">
+          <DataField>Bank_Code_Caption</DataField>
+        </Field>
+        <Field Name="Bank_Name_Caption">
+          <DataField>Bank_Name_Caption</DataField>
+        </Field>
+        <Field Name="Reconciliation_as_at_Caption">
+          <DataField>Reconciliation_as_at_Caption</DataField>
+        </Field>
+        <Field Name="Bank_Account_balance_as_per_Cash_Book_Caption">
+          <DataField>Bank_Account_balance_as_per_Cash_Book_Caption</DataField>
+        </Field>
+        <Field Name="Balance_on_Bank_Statement_Caption">
+          <DataField>Balance_on_Bank_Statement_Caption</DataField>
+        </Field>
+        <Field Name="Difference_to_be_Explained_Caption">
+          <DataField>Difference_to_be_Explained_Caption</DataField>
+        </Field>
+        <Field Name="Bank_Account_No_Caption">
+          <DataField>Bank_Account_No_Caption</DataField>
+        </Field>
+        <Field Name="Expected_Balance_As_Per_Bank_StatementCaption">
+          <DataField>Expected_Balance_As_Per_Bank_StatementCaption</DataField>
+        </Field>
+        <Field Name="Actual_Balance_on_Bank_Statement_Caption">
+          <DataField>Actual_Balance_on_Bank_Statement_Caption</DataField>
+        </Field>
+        <Field Name="Difference_between_Cash_book_and_Bank_Statement_BalanceCaption">
+          <DataField>Difference_between_Cash_book_and_Bank_Statement_BalanceCaption</DataField>
+        </Field>
+        <Field Name="Total_Unreconciling_itemsCaption">
+          <DataField>Total_Unreconciling_itemsCaption</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line__Document_No__Caption">
+          <DataField>Bank_Account_Statement_Line__Document_No__Caption</DataField>
+        </Field>
+        <Field Name="DateCaption">
+          <DataField>DateCaption</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line_DescriptionCaption">
+          <DataField>Bank_Account_Statement_Line_DescriptionCaption</DataField>
+        </Field>
+        <Field Name="AmountCaption">
+          <DataField>AmountCaption</DataField>
+        </Field>
+        <Field Name="ReconciledCaption">
+          <DataField>ReconciledCaption</DataField>
+        </Field>
+        <Field Name="Cheque_No_Caption">
+          <DataField>Cheque_No_Caption</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line_DifferenceCaption">
+          <DataField>Bank_Account_Statement_Line_DifferenceCaption</DataField>
+        </Field>
+        <Field Name="Differences_Expalined_by_Uncredited_and_Unpresented_Cheques_Caption">
+          <DataField>Differences_Expalined_by_Uncredited_and_Unpresented_Cheques_Caption</DataField>
+        </Field>
+        <Field Name="Difference_ExplainedCaption">
+          <DataField>Difference_ExplainedCaption</DataField>
+        </Field>
+        <Field Name="Uncredited_ChequesCaption">
+          <DataField>Uncredited_ChequesCaption</DataField>
+        </Field>
+        <Field Name="Unpresented_ChequesCaption">
+          <DataField>Unpresented_ChequesCaption</DataField>
+        </Field>
+        <Field Name="Difference_between_Cashbook_and_BankCaption">
+          <DataField>Difference_between_Cashbook_and_BankCaption</DataField>
+        </Field>
+        <Field Name="Prepared_by______________________________________________________________Date_______________________________________________Caption">
+          <DataField>Prepared_by______________________________________________________________Date_______________________________________________Caption</DataField>
+        </Field>
+        <Field Name="Reviewed_by______________________________________________________________Date_______________________________________________Caption">
+          <DataField>Reviewed_by______________________________________________________________Date_______________________________________________Caption</DataField>
+        </Field>
+        <Field Name="Approved_by______________________________________________________________Date_______________________________________________Caption">
+          <DataField>Approved_by______________________________________________________________Date_______________________________________________Caption</DataField>
+        </Field>
+        <Field Name="ACCOUNTANTCaption">
+          <DataField>ACCOUNTANTCaption</DataField>
+        </Field>
+        <Field Name="FINANCE_MANAGERCaption">
+          <DataField>FINANCE_MANAGERCaption</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line_Statement_No_">
+          <DataField>Bank_Account_Statement_Line_Statement_No_</DataField>
+        </Field>
+        <Field Name="Bank_Account_Statement_Line_Statement_Line_No_">
+          <DataField>Bank_Account_Statement_Line_Statement_Line_No_</DataField>
+        </Field>
+        <Field Name="AccountName_BankAccountStatementLine">
+          <DataField>AccountName_BankAccountStatementLine</DataField>
+        </Field>
+      </Fields>
+      <rd:DataSetInfo>
+        <rd:DataSetName>DataSet</rd:DataSetName>
+        <rd:SchemaPath>Report.xsd</rd:SchemaPath>
+        <rd:TableName>Result</rd:TableName>
+      </rd:DataSetInfo>
+    </DataSet>
+  </DataSets>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <Height>8.46011cm</Height>
+        <Style />
+      </Body>
+      <Width>34.65001cm</Width>
+      <Page>
+        <PageHeader>
+          <Height>6.345cm</Height>
+          <PrintOnFirstPage>true</PrintOnFirstPage>
+          <PrintOnLastPage>true</PrintOnLastPage>
+          <Style />
+        </PageHeader>
+        <PageHeight>29.7cm</PageHeight>
+        <PageWidth>24.25002cm</PageWidth>
+        <LeftMargin>2.1cm</LeftMargin>
+        <RightMargin>0cm</RightMargin>
+        <TopMargin>2cm</TopMargin>
+        <BottomMargin>2cm</BottomMargin>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <Code>Public Function BlankZero(ByVal Value As Decimal)
+    if Value = 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankPos(ByVal Value As Decimal)
+    if Value &gt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankZeroAndPos(ByVal Value As Decimal)
+    if Value &gt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNeg(ByVal Value As Decimal)
+    if Value &lt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNegAndZero(ByVal Value As Decimal)
+    if Value &lt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+</Code>
+  <Language>=User!Language</Language>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Cm</rd:ReportUnitType>
+  <rd:ReportID>936171f0-c8a6-4408-bef6-cd37d255837c</rd:ReportID>
+</Report>
